@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+@theme {
+	--color-laravel-red: #f53003;
+	--color-laravel-red-faded: #ffe2dd;
+}
