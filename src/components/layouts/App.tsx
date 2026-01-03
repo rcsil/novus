@@ -3,6 +3,7 @@ import TitleBar from "./TitleBar";
 import Editor from "../Editor";
 import TabBar from "./TabBar";
 import Sidebar from "./Sidebar";
+import GitHubSidebar from "./GitHubSidebar";
 import ActivityBar from "./ActivityBar";
 import TerminalPanel from "../ui/TerminalPanel";
 import useApp from "../../hooks/components/layouts/useApp";
@@ -68,6 +69,12 @@ function App() {
             rootPath={rootPath}
             onOpenFile={(path) => handleOpenFile(path)}
             activeFilePath={activeFile?.path}
+          />
+        )}
+        {isSidebarVisible && activeView === 'github' && (
+          <GitHubSidebar
+            rootPath={rootPath}
+            onOpenFolder={handleOpenFolder}
           />
         )}
         <div className="flex flex-col flex-1 min-w-0">

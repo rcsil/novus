@@ -2,6 +2,8 @@ use serde::{Serialize, Deserialize};
 use std::fs;
 
 mod terminal;
+mod auth;
+mod git_ops;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FileEntry {
@@ -68,7 +70,19 @@ pub fn run() {
             read_directory,
             terminal::create_terminal,
             terminal::write_terminal,
-            terminal::resize_terminal
+            terminal::resize_terminal,
+            auth::start_github_auth,
+            auth::poll_github_token,
+            auth::get_cached_token,
+            auth::logout_github,
+            git_ops::list_repos,
+            git_ops::clone_repo,
+            git_ops::get_repo_status,
+            git_ops::list_branches,
+            git_ops::create_branch,
+            git_ops::switch_branch,
+            git_ops::pull_repo,
+            git_ops::push_repo
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
