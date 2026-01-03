@@ -4,6 +4,7 @@ use std::fs;
 mod terminal;
 mod auth;
 mod git_ops;
+mod laravel;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FileEntry {
@@ -82,7 +83,13 @@ pub fn run() {
             git_ops::create_branch,
             git_ops::switch_branch,
             git_ops::pull_repo,
-            git_ops::push_repo
+            git_ops::push_repo,
+            laravel::check_is_laravel,
+            laravel::get_laravel_routes,
+            laravel::get_laravel_logs,
+            laravel::create_laravel_project,
+            laravel::run_artisan_command,
+            laravel::get_laravel_version
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

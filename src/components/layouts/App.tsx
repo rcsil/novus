@@ -4,6 +4,9 @@ import Editor from "../Editor";
 import TabBar from "./TabBar";
 import Sidebar from "./Sidebar";
 import GitHubSidebar from "./GitHubSidebar";
+// import LaravelSidebar from "./LaravelSidebar";
+import LaravelNavigation from "../laravel/Navigation";
+import LaravelWorkspace from "../laravel/Workspace";
 import ActivityBar from "./ActivityBar";
 import TerminalPanel from "../ui/TerminalPanel";
 import useApp from "../../hooks/components/layouts/useApp";
@@ -27,6 +30,7 @@ function App() {
   const [activeView, setActiveView] = useState("explorer");
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
+  const [activeLaravelSection, setActiveLaravelSection] = useState('overview');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,34 +81,52 @@ function App() {
             onOpenFolder={handleOpenFolder}
           />
         )}
-        <div className="flex flex-col flex-1 min-w-0">
-          <TabBar
-            tabs={files.map(f => ({ id: f.id, name: f.name, isActive: f.id === activeFileId, isDirty: f.isDirty }))}
-            onTabClick={setActiveFileId}
-            onTabClose={handleCloseTab}
+        {isSidebarVisible && activeView === 'laravel' && (
+          <LaravelNavigation 
+            activeSection={activeLaravelSection}
+            onSectionChange={setActiveLaravelSection}
           />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <main className="flex-1 overflow-hidden relative">
-              {activeFile ? (
-                <Editor
-                  code={activeFile.content}
-                  path={activeFile.path}
-                  onChange={handleEditorChange}
-                  language="php"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <div className="text-center">
-                    <p className="mb-2">No open files</p>
-                    <p className="text-xs">Use File &gt; New File or File &gt; Open File</p>
-                  </div>
+        )}
+        <div className="flex flex-col flex-1 min-w-0">
+          {activeView === 'laravel' ? (
+             rootPath ? (
+               <LaravelWorkspace rootPath={rootPath} activeSection={activeLaravelSection} />
+             ) : (
+               <div className="flex items-center justify-center h-full text-gray-500">
+                  Open a folder to view Laravel Dashboard.
+               </div>
+             )
+          ) : (
+            <>
+              <TabBar
+                tabs={files.map(f => ({ id: f.id, name: f.name, isActive: f.id === activeFileId, isDirty: f.isDirty }))}
+                onTabClick={setActiveFileId}
+                onTabClose={handleCloseTab}
+              />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <main className="flex-1 overflow-hidden relative">
+                  {activeFile ? (
+                    <Editor
+                      code={activeFile.content}
+                      path={activeFile.path}
+                      onChange={handleEditorChange}
+                      language="php"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <div className="text-center">
+                        <p className="mb-2">No open files</p>
+                        <p className="text-xs">Use File &gt; New File or File &gt; Open File</p>
+                      </div>
+                    </div>
+                  )}
+                </main>
+                <div className={`border-t border-zinc-700 bg-[#1e1e1e] ${isTerminalOpen ? 'h-64' : 'h-0 hidden'}`}>
+                  <TerminalPanel onClose={() => setIsTerminalOpen(false)} />
                 </div>
-              )}
-            </main>
-            <div className={`border-t border-zinc-700 bg-[#1e1e1e] ${isTerminalOpen ? 'h-64' : 'h-0 hidden'}`}>
-              <TerminalPanel onClose={() => setIsTerminalOpen(false)} />
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

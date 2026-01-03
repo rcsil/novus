@@ -1,7 +1,8 @@
 import {
 	IconFiles,
 	IconTerminal2,
-	IconBrandGithub
+	IconBrandGithub,
+	IconBrandLaravel
 } from '@tabler/icons-react';
 
 interface ActivityBarProps {
@@ -15,6 +16,7 @@ export default function ActivityBar({ activeView, onViewChange, onToggleTerminal
 	const topItems = [
 		{ id: 'explorer', icon: IconFiles },
 		{ id: 'github', icon: IconBrandGithub },
+		{ id: 'laravel', icon: IconBrandLaravel },
 	];
 
 	return (
