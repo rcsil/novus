@@ -2,7 +2,7 @@ use keyring::Entry;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-const GITHUB_CLIENT_ID: &str = "Iv1.8a61f9b3a7ad76c2"; 
+const GITHUB_CLIENT_ID: &str = "178c6fc778ccc68e1d6a"; // GitHub CLI Client ID (for testing)
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeviceCodeResponse {
@@ -22,6 +22,7 @@ pub struct AuthTokenResponse {
 
 #[tauri::command]
 pub async fn start_github_auth() -> Result<DeviceCodeResponse, String> {
+    println!("Starting GitHub Auth...");
     let client = Client::new();
     let res = client
         .post("https://github.com/login/device/code")
@@ -29,13 +30,26 @@ pub async fn start_github_auth() -> Result<DeviceCodeResponse, String> {
         .form(&[("client_id", GITHUB_CLIENT_ID)]) 
         .send()
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| {
+            println!("Request failed: {}", e);
+            e.to_string()
+        })?;
 
-    if !res.status().is_success() {
-        return Err(format!("Failed to start auth: {}", res.status()));
+    let status = res.status();
+    println!("Response status: {}", status);
+
+    if !status.is_success() {
+        let text = res.text().await.unwrap_or_default();
+        println!("Error body: {}", text);
+        return Err(format!("Failed to start auth: {} - {}", status, text));
     }
 
-    let data: DeviceCodeResponse = res.json().await.map_err(|e| e.to_string())?;
+    let data: DeviceCodeResponse = res.json().await.map_err(|e| {
+        println!("JSON parse error: {}", e);
+        e.to_string()
+    })?;
+    
+    println!("Auth started successfully: {:?}", data);
     Ok(data)
 }
 
@@ -47,7 +61,7 @@ pub async fn poll_github_token(device_code: String) -> Result<String, String> {
         .post("https://github.com/login/oauth/access_token")
         .header("Accept", "application/json")
         .form(&[
-            ("client_id", GITHUB_CLIENT_ID), 
+            ("client_id", "Ov23liiyYqurLLNFx3ie"), 
             ("device_code", device_code.as_str()),
             ("grant_type", "urn:ietf:params:oauth:grant-type:device_code"),
         ])

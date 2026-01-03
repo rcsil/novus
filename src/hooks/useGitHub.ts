@@ -51,6 +51,7 @@ export function useGitHub() {
       poll(data.device_code, data.interval);
     } catch (e) {
       console.error(e);
+      alert("Auth failed: " + e);
       setLoading(false);
     }
   };
