@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { FileTab } from "../../../types/components/layouts/App";
+import { FileEntry } from "../../../types/FileSystem";
 
 export default function useApp() {
   const [files, setFiles] = useState<FileTab[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [rootFolder, setRootFolder] = useState<FileEntry[]>([]);
+  const [rootPath, setRootPath] = useState<string | null>(null);
 
-  // Initialize with a default file if empty on load
   useEffect(() => {
     if (files.length === 0) {
       handleNewFile();
@@ -27,13 +29,39 @@ export default function useApp() {
     setActiveFileId(newId);
   };
 
-  const handleOpenFile = async () => {
+  const handleOpenFolder = async () => {
     try {
       const selected = await open({
+        directory: true,
         multiple: false,
       });
 
       if (selected && typeof selected === 'string') {
+        setRootPath(selected);
+        const entries = await invoke<FileEntry[]>("read_directory", { path: selected });
+        setRootFolder(entries);
+      }
+    } catch (error) {
+       console.error("Failed to open folder:", error);
+    }
+  };
+
+  const handleOpenFile = async (path?: string) => {
+    try {
+      let selected: string | null = null;
+      
+      if (path) {
+        selected = path;
+      } else {
+        const result = await open({
+          multiple: false,
+        });
+        if (result && typeof result === 'string') {
+          selected = result;
+        }
+      }
+
+      if (selected) {
         const existing = files.find(f => f.path === selected);
         if (existing) {
           setActiveFileId(existing.id);
@@ -42,7 +70,6 @@ export default function useApp() {
 
         const text = await invoke<string>("read_file_content", { path: selected });
         const newId = Date.now().toString();
-        // Extract filename from path (naive implementation)
         const name = selected.split(/[\\/]/).pop() || selected;
         
         const newFile: FileTab = {
@@ -67,7 +94,6 @@ export default function useApp() {
     const file = files.find(f => f.id === activeFileId);
     if (!file) return;
 
-    // Check if it's a new untitled file
     if (file.path.startsWith('untitled-')) {
       try {
         const selected = await save({
@@ -92,7 +118,6 @@ export default function useApp() {
         console.error("Failed to save file as:", error);
       }
     } else {
-      // Normal save
       try {
         await invoke("write_file_content", { path: file.path, content: file.content });
         setFiles((prev) => prev.map(f => f.id === activeFileId ? { ...f, isDirty: false } : f));
@@ -130,7 +155,6 @@ export default function useApp() {
     }
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -141,11 +165,9 @@ export default function useApp() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeFileId, files]); // Re-bind when files/active change to get latest state in closure
+  }, [activeFileId, files]);
 
-  // Auto-save effect (only for existing files)
   useEffect(() => {
-    // Filter out untitled files from auto-save
     const dirtyFiles = files.filter(f => f.isDirty && !f.path.startsWith('untitled-'));
     if (dirtyFiles.length === 0) return;
 
@@ -170,9 +192,12 @@ export default function useApp() {
     files,
     activeFileId,
     activeFile,
+    rootFolder,
+    rootPath,
     setActiveFileId,
     handleNewFile,
     handleOpenFile,
+    handleOpenFolder,
     handleSave,
     handleCloseTab,
     handleEditorChange

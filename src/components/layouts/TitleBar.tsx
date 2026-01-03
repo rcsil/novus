@@ -3,7 +3,7 @@ import useTitleBar from "../../hooks/components/layouts/useTitleBar";
 import MenuBar from "./MenuBar";
 import { TitleBarProps } from "../../types/components/layouts/TitleBar";
 
-export default function TitleBar({ onNewFile, onOpenFile, onSave }: TitleBarProps) {
+export default function TitleBar({ onNewFile, onOpenFile, onOpenFolder, onSave }: TitleBarProps) {
   const { minimize, toggleMaximize, close, isMaximized } = useTitleBar();
 
   return (
@@ -15,7 +15,7 @@ export default function TitleBar({ onNewFile, onOpenFile, onSave }: TitleBarProp
         <IconBrandLaravel className="text-laravel-red" size={20} stroke={1.5} />
       </div>
       <div className="flex-1 flex items-center pl-2 pointer-events-auto z-40">
-        <MenuBar onNewFile={onNewFile} onOpenFile={onOpenFile} onSave={onSave} />
+        <MenuBar onNewFile={onNewFile} onOpenFile={onOpenFile} onOpenFolder={onOpenFolder} onSave={onSave} />
       </div>
       <div className="flex h-full items-center pr-2 gap-2">
         <button

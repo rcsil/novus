@@ -1,7 +1,7 @@
 import { MenuBarProps } from "../../types/components/layouts/MenuBar";
 import Dropdown, { DropdownItem } from "../ui/Dropdown";
 
-export default function MenuBar({ onNewFile, onOpenFile, onSave }: MenuBarProps) {
+export default function MenuBar({ onNewFile, onOpenFile, onOpenFolder, onSave }: MenuBarProps) {
   return (
     <div className="flex items-center text-sm">
       <Dropdown
@@ -16,6 +16,9 @@ export default function MenuBar({ onNewFile, onOpenFile, onSave }: MenuBarProps)
         </DropdownItem>
         <DropdownItem onClick={onOpenFile}>
           Open File...
+        </DropdownItem>
+        <DropdownItem onClick={onOpenFolder}>
+          Open Folder...
         </DropdownItem>
         <div className="border-t border-gray-700 my-1"></div>
         <DropdownItem onClick={onSave}>

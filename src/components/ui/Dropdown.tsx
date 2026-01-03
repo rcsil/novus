@@ -25,7 +25,7 @@ export default function Dropdown({ trigger, children }: DropdownProps) {
 
       {isOpen && (
         <div
-          className="absolute left-0 mt-1 w-56 origin-top-left bg-gray-800 border border-gray-700 divide-y divide-gray-700 rounded-md shadow-lg outline-none z-50"
+          className="absolute left-0 mt-1 w-56 origin-top-left bg-gray-800/90 border border-gray-700 divide-y divide-gray-700 rounded-md shadow-lg outline-none z-999"
           role="menu"
         >
           <div className="py-1" onClick={() => setIsOpen(false)}>
