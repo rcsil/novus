@@ -1,50 +1,78 @@
-import { useState, useRef, useEffect } from "react";
-import { DropdownProps } from "../../types/components/ui/Dropdown";
+import React from "react";
 
-export default function Dropdown({ trigger, children }: DropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)}>
-        {trigger}
-      </div>
-
-      {isOpen && (
-        <div
-          className="absolute left-0 mt-1 w-56 origin-top-left bg-gray-800/90 border border-gray-700 divide-y divide-gray-700 rounded-md shadow-lg outline-none z-999"
-          role="menu"
-        >
-          <div className="py-1" onClick={() => setIsOpen(false)}>
-            {children}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+export default function Dropdown({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="absolute top-full left-0 mt-1 w-56 bg-[#1F2937] border border-gray-700 rounded-md shadow-xl z-50 py-1 flex flex-col">
+			{children}
+		</div>
+	);
 }
 
-export function DropdownItem({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className="block w-54 mx-auto rounded-md text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-      role="menuitem"
-    >
-      {children}
-    </button>
-  );
+interface AppMenuItemProps {
+	label?: string;
+	shortcut?: string;
+	onClick: () => void;
+	danger?: boolean;
+}
+
+export function DropdownItem({
+	label,
+	shortcut,
+	onClick,
+	danger,
+}: AppMenuItemProps) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={`text-left px-4 py-2 text-xs flex justify-between items-center transition-colors group mx-1 rounded-md
+        ${danger
+					? "text-red-500/70 hover:bg-red-500/10 group-hover:text-red-400"
+					: "text-gray-200 hover:bg-gray-700"
+				}
+      `}
+		>
+			<span>{label}</span>
+
+			{shortcut && (
+				<span
+					className={`text-[10px] ${danger
+							? "text-red-500/70 group-hover:text-red-400"
+							: "text-gray-500 group-hover:text-gray-400"
+						}`}
+				>
+					{shortcut}
+				</span>
+			)}
+		</button>
+	);
+}
+
+interface ButtonDropdownProps
+	extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+	children: React.ReactNode;
+	isOpen: boolean;
+}
+
+export function ButtonDropdown({
+	children,
+	isOpen,
+	className,
+	...props
+}: ButtonDropdownProps) {
+	return (
+		<button
+			type="button"
+			className={`text-xs px-2.5 py-1.5 rounded-xl cursor-pointer transition-colors focus:outline-none
+        ${isOpen
+					? "bg-gray-900 text-white"
+					: "text-gray-400 hover:bg-gray-900 hover:text-white"
+				}
+        ${className ?? ""}
+      `}
+			{...props}
+		>
+			{children}
+		</button>
+	);
 }
