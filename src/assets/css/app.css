@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @import "@xterm/xterm/css/xterm.css";
 
+@theme {
+  --color-primary-50: #fff1f1;
+  --color-primary-100: #ffdfdf;
+  --color-primary-200: #ffc4c4;
+  --color-primary-300: #ff9e9e;
+  --color-primary-400: #ff6a6a;
+  --color-primary-500: #ff2d20;
+  --color-primary-600: #eb1e12;
+  --color-primary-700: #c61208;
+  --color-primary-800: #a3110a;
+  --color-primary-900: #86140f;
+  --color-primary-950: #4a0604;
+  --color-primary: var(--color-primary-500);
+}
+
 :root {
   --color-background: #111827;
 }

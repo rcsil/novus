@@ -33,7 +33,6 @@ export function DropdownItem({
       `}
 		>
 			<span>{label}</span>
-
 			{shortcut && (
 				<span
 					className={`text-[10px] ${danger

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from '@tauri-apps/api/core';
-import AppHeader from "./components/layouts/AppHeader";
+import AppHeader from "./components/layouts/app-header";
 import CodeEditor from "./components/CodeEditor";
 import FileTreeRoot from "./components/FileTree";
 import Tabs from "./components/Tabs";
@@ -207,7 +207,7 @@ export default function App() {
   const isSidebarVisible = (projectPath && (activeView === 'explorer' || activeView === 'source-control')) || activeView === 'chat';
 
   return (
-    <div className="flex flex-col h-screen bg-gray-800 text-white overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-800/95 text-white overflow-hidden">
       <AppHeader
         onOpen={handleOpenFile}
         onOpenFolder={handleOpenFolder}
@@ -220,7 +220,7 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden">
         <ActivityBar activeView={activeView} onViewChange={setActiveView} />
         <div
-          className="bg-background/90 flex flex-col transition-all duration-300 ease-in-out"
+          className="flex flex-col transition-all duration-300 ease-in-out bg-gray-900 rounded-xl mr-1 mb-1"
           style={{ width: isSidebarVisible ? sidebarWidth : 0, opacity: isSidebarVisible ? 1 : 0, overflow: "hidden" }}
         >
           {projectPath && activeView === 'explorer' && (
@@ -247,14 +247,12 @@ export default function App() {
             <ChatPanel activeFileContent={activeFile?.content} activeFileName={activeFile?.name} />
           )}
         </div>
-
-        <main className="flex-1 bg-background relative flex flex-col min-w-0">
+        <main className="flex-1 relative flex flex-col min-w-0">
           <div className="flex-1 flex flex-col overflow-hidden">
             {activeView === 'laravel' ? (
-              <div className="flex-1 overflow-hidden h-full">
+              <div className="flex-1 overflow-hidden h-full pr-1 pb-1">
                 <LaravelDashboard 
-                  projectPath={projectPath} 
-                  height={window.innerHeight - 80} // Approx full height minus header/statusbar
+                  projectPath={projectPath}
                   isOpen={true} 
                   onToggle={() => {}} 
                 />
