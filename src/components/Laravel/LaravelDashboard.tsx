@@ -42,12 +42,11 @@ interface SystemMetrics {
 
 interface LaravelDashboardProps {
 	projectPath: string | null;
-	height: number;
 	isOpen: boolean;
 	onToggle: (isOpen: boolean) => void;
 }
 
-export default function LaravelDashboard({ projectPath, height, isOpen }: LaravelDashboardProps) {
+export default function LaravelDashboard({ projectPath, isOpen }: LaravelDashboardProps) {
 	const [isLaravelProject, setIsLaravelProject] = useState<boolean | null>(null);
 	const [activeTab, setActiveTab] = useState<"overview" | "logs" | "requests">("overview");
 
@@ -179,16 +178,16 @@ export default function LaravelDashboard({ projectPath, height, isOpen }: Larave
 
 	if (isLaravelProject === false) {
 		return (
-			<div className="flex flex-col items-center justify-center h-full text-gray-500 bg-[#0f1523]/95 border-t border-gray-800" style={{ height }}>
-				<IconAlertTriangle size={32} className="mb-2 text-yellow-500" />
+			<div className="flex flex-col items-center justify-center h-full text-gray-500 bg-gray-900 rounded-xl" >
+				<IconAlertTriangle className="mb-2 text-orange-500" size={32} stroke={1.5} />
 				<p>This does not appear to be a Laravel project.</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="flex flex-col bg-[#0f1523]/95 border-t border-gray-800 text-gray-300 font-sans" style={{ height }}>
-			<div className="h-10 flex items-center px-4 border-b border-gray-800 gap-6 bg-[#0f1523]/50 shrink-0">
+		<div className="flex flex-col text-gray-300 font-sans h-full bg-gray-900 rounded-xl">
+			<div className="h-10 flex items-center px-4 gap-6 shrink-0">
 				<div className="flex items-center gap-2 text-[#FF2D20] font-bold select-none mr-2">
 					<IconBrandLaravel size={22} />
 					<span className="tracking-tight uppercase text-xs">Novus for Laravel</span>

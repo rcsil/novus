@@ -91,7 +91,7 @@ export default function AppHeader({
         className="flex items-center justify-between select-none shrink-0 p-1.5 px-3"
       >
         <div className="flex items-center z-10">
-          <div className="flex items-center text-[#FF2D20] pr-3">
+          <div className="flex items-center text-primary pr-3 pl-2 hover:text-white hover:scale-105 transition-transform">
             <IconBrandLaravel size={20} stroke={1} />
           </div>
           <div className="flex items-center gap-1">
