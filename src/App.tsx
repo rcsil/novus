@@ -117,6 +117,23 @@ export default function App() {
     }
   };
 
+  const handleFileRename = (oldPath: string, newPath: string) => {
+    setOpenFiles(prev => prev.map(f => {
+      if (f.id === oldPath) {
+        return {
+          ...f,
+          id: newPath,
+          name: newPath.replace(/^.*[\\/]/, '')
+        };
+      }
+      return f;
+    }));
+    
+    if (activeFileId === oldPath) {
+      setActiveFileId(newPath);
+    }
+  };
+
   const handleEditorChange = (newContent: string) => {
     if (!activeFileId) return;
     setOpenFiles(prev => prev.map(f => {
@@ -236,6 +253,7 @@ export default function App() {
                 <FileTreeRoot
                   path={projectPath}
                   onFileSelect={(path) => openFile(path)}
+                  onFileRename={handleFileRename}
                 />
               </div>
             </>

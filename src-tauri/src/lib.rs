@@ -13,6 +13,11 @@ use window_vibrancy::apply_blur;
 #[cfg(target_os = "macos")]
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
+mod commands;
+mod fs;
+
+use commands::rename::rename_file;
+
 struct PtyState {
     ptys: Mutex<HashMap<String, (Box<dyn portable_pty::MasterPty + Send>, Box<dyn Write + Send>)>>,
 }
@@ -419,7 +424,8 @@ pub fn run() {
             git_checkout_branch,
             save_file,
             read_directory,
-            read_file_content
+            read_file_content,
+            rename_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
