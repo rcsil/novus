@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { IconFolder, IconFolderOpen, IconFile, IconChevronRight, IconChevronDown, IconBrandPhp, IconBrandTypescript, IconBrandJavascript, IconBrandCss3, IconBrandHtml5, IconJson, IconEdit } from "@tabler/icons-react";
+import {
+	IconFolder,
+	IconFolderOpen,
+	IconFile,
+	IconChevronRight,
+	IconChevronDown,
+	IconBrandPhp,
+	IconBrandTypescript,
+	IconBrandJavascript,
+	IconBrandCss3,
+	IconBrandHtml5,
+	IconJson,
+} from "@tabler/icons-react";
 import Dropdown, { DropdownItem } from "./ui/Dropdown";
 
 interface FileTreeProps {
@@ -159,7 +171,7 @@ function FileTreeItem({ entry, onFileSelect, level, onRenameComplete, refreshTri
 			// Calculate new path manually (simple implementation)
 			// Assuming backend success, we construct the new path locally for the callback
 			// In a more robust system, the backend might return the new path
-			const parentPath = entry.path.substring(0, entry.path.lastIndexOf(entry.name)); // Keep trailing separator if any, or just ensure we join correctly
+            
             // Handling path separators safely is tricky in JS without `path` module. 
             // Assuming the existing path separator style.
             const separator = entry.path.includes('\\') ? '\\' : '/';
