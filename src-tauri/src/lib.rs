@@ -8,6 +8,7 @@ use std::{
 };
 use sysinfo::System;
 use tauri::{Emitter, Manager, State};
+use tauri_plugin_fs::FsExt;
 #[cfg(target_os = "windows")]
 use window_vibrancy::apply_blur;
 #[cfg(target_os = "macos")]
@@ -50,6 +51,13 @@ fn get_system_metrics(state: State<'_, SystemState>) -> SystemMetrics {
 fn check_laravel_project(path: String) -> bool {
     let artisan_path = std::path::Path::new(&path).join("artisan");
     artisan_path.exists()
+}
+
+#[tauri::command]
+fn allow_project_directory_scope(app: tauri::AppHandle, path: String) -> Result<(), String> {
+    app.fs_scope()
+        .allow_directory(path, true)
+        .map_err(|e| e.to_string())
 }
 
 use std::io::{Seek, SeekFrom};
@@ -415,6 +423,7 @@ pub fn run() {
             read_file_tail,
             get_system_metrics,
             check_laravel_project,
+            allow_project_directory_scope,
             git_status,
             git_diff,
             git_add,

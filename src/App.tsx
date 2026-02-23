@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from '@tauri-apps/api/core';
+import { watch, type UnwatchFn, type WatchEvent } from "@tauri-apps/plugin-fs";
 import AppHeader from "./components/layouts/app-header";
 import CodeEditor from "./components/CodeEditor";
 import FileTreeRoot from "./components/FileTree";
@@ -23,10 +24,17 @@ interface OpenFile {
 
 type ActivityBarView = "explorer" | "source-control" | "laravel" | "chat";
 
+function isRelevantWatchEvent(eventType: WatchEvent["type"]) {
+  if (eventType === "any") return true;
+  if (eventType === "other") return false;
+  return "create" in eventType || "modify" in eventType || "remove" in eventType;
+}
+
 export default function App() {
   const [openFiles, setOpenFiles] = useState<OpenFile[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [projectPath, setProjectPath] = useState<string | null>(null);
+  const [fileTreeRefreshTrigger, setFileTreeRefreshTrigger] = useState(0);
   const [sidebarWidth] = useState(300); // Increased slightly for Chat
 
   const [bottomPanelHeight, setBottomPanelHeight] = useState(250);
@@ -36,10 +44,22 @@ export default function App() {
   const [activeView, setActiveView] = useState<ActivityBarView>("explorer");
 
   const stateRef = useRef({ openFiles, activeFileId });
+  const fileTreeRefreshTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     stateRef.current = { openFiles, activeFileId };
   }, [openFiles, activeFileId]);
+
+  const triggerFileTreeRefresh = useCallback(() => {
+    if (fileTreeRefreshTimeoutRef.current !== null) {
+      window.clearTimeout(fileTreeRefreshTimeoutRef.current);
+    }
+
+    fileTreeRefreshTimeoutRef.current = window.setTimeout(() => {
+      setFileTreeRefreshTrigger(prev => prev + 1);
+      fileTreeRefreshTimeoutRef.current = null;
+    }, 150);
+  }, []);
 
   const activeFile = openFiles.find(f => f.id === activeFileId);
 
@@ -96,11 +116,73 @@ export default function App() {
 
   const handleOpenFolder = useCallback(async () => {
     try {
-      const selected = await open({ directory: true, multiple: false });
+      const selected = await open({ directory: true, multiple: false, recursive: true });
       if (selected && typeof selected === "string") {
+        await invoke("allow_project_directory_scope", { path: selected });
         setProjectPath(selected);
       }
     } catch (err) { console.error(err); }
+  }, []);
+
+  useEffect(() => {
+    if (!projectPath) return;
+
+    let unwatch: UnwatchFn | null = null;
+    let fallbackInterval: number | null = null;
+    let disposed = false;
+
+    const startPollingFallback = () => {
+      if (fallbackInterval !== null) return;
+      fallbackInterval = window.setInterval(() => {
+        triggerFileTreeRefresh();
+      }, 1500);
+    };
+
+    const startWatcher = async () => {
+      try {
+        await invoke("allow_project_directory_scope", { path: projectPath });
+
+        const unwatchFn = await watch(
+          projectPath,
+          (event) => {
+            if (isRelevantWatchEvent(event.type)) {
+              triggerFileTreeRefresh();
+            }
+          },
+          { recursive: true, delayMs: 180 }
+        );
+
+        if (disposed) {
+          unwatchFn();
+          return;
+        }
+
+        unwatch = unwatchFn;
+      } catch (error) {
+        console.error("Failed to watch project directory:", error);
+        startPollingFallback();
+      }
+    };
+
+    startWatcher();
+
+    return () => {
+      disposed = true;
+      if (unwatch) {
+        unwatch();
+      }
+      if (fallbackInterval !== null) {
+        window.clearInterval(fallbackInterval);
+      }
+    };
+  }, [projectPath, triggerFileTreeRefresh]);
+
+  useEffect(() => {
+    return () => {
+      if (fileTreeRefreshTimeoutRef.current !== null) {
+        window.clearTimeout(fileTreeRefreshTimeoutRef.current);
+      }
+    };
   }, []);
 
   const handleCloseTab = (id: string) => {
@@ -153,8 +235,9 @@ export default function App() {
         if (f.id === activeFile.id) return { ...f, isDirty: false };
         return f;
       }));
+      triggerFileTreeRefresh();
     } catch (err) { console.error(err); }
-  }, []);
+  }, [triggerFileTreeRefresh]);
 
   const handleSaveAs = useCallback(async () => {
     const { openFiles, activeFileId } = stateRef.current;
@@ -172,9 +255,10 @@ export default function App() {
           return f;
         }));
         setActiveFileId(path);
+        triggerFileTreeRefresh();
       }
     } catch (err) { console.error(err); }
-  }, []);
+  }, [triggerFileTreeRefresh]);
 
   const handleCloseApp = useCallback(async () => {
     await getCurrentWindow().close();
@@ -254,6 +338,7 @@ export default function App() {
                   path={projectPath}
                   onFileSelect={(path) => openFile(path)}
                   onFileRename={handleFileRename}
+                  refreshTrigger={fileTreeRefreshTrigger}
                 />
               </div>
             </>

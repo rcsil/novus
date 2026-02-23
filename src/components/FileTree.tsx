@@ -19,6 +19,7 @@ interface FileTreeProps {
 	path: string;
 	onFileSelect: (path: string) => void;
 	onFileRename?: (oldPath: string, newPath: string) => void;
+	refreshTrigger?: number;
 }
 
 interface FileEntry {
@@ -27,10 +28,16 @@ interface FileEntry {
 	is_directory: boolean;
 }
 
-export default function FileTree({ path, onFileSelect, onFileRename }: FileTreeProps) {
+export default function FileTree({
+	path,
+	onFileSelect,
+	onFileRename,
+	refreshTrigger: externalRefreshTrigger = 0
+}: FileTreeProps) {
 	const [entries, setEntries] = useState<FileEntry[]>([]);
 	const [loaded, setLoaded] = useState(false);
-	const [refreshTrigger, setRefreshTrigger] = useState(0);
+	const [internalRefreshTrigger, setInternalRefreshTrigger] = useState(0);
+	const effectiveRefreshTrigger = internalRefreshTrigger + externalRefreshTrigger;
 
 	async function loadRoot() {
 		try {
@@ -51,10 +58,10 @@ export default function FileTree({ path, onFileSelect, onFileRename }: FileTreeP
 		if (path) {
 			loadRoot();
 		}
-	}, [path, refreshTrigger]);
+	}, [path, effectiveRefreshTrigger]);
 
 	const handleRenameComplete = (oldPath: string, newPath: string) => {
-		setRefreshTrigger(prev => prev + 1);
+		setInternalRefreshTrigger(prev => prev + 1);
 		if (onFileRename) {
 			onFileRename(oldPath, newPath);
 		}
@@ -71,7 +78,7 @@ export default function FileTree({ path, onFileSelect, onFileRename }: FileTreeP
 					onFileSelect={onFileSelect}
 					level={0}
 					onRenameComplete={handleRenameComplete}
-					refreshTrigger={refreshTrigger}
+					refreshTrigger={effectiveRefreshTrigger}
 				/>
 			))}
 		</div>
